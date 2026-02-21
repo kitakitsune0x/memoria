@@ -1,5 +1,8 @@
 # Memoria
 
+<img width="1998" height="594" alt="ascii-art-text (1)" src="https://github.com/user-attachments/assets/f8385d93-f222-4bc8-b454-0b8829f4d870" />
+
+
 Structured memory system for AI agents with local markdown vault and two-way Notion sync.
 
 > Local-first. Markdown-first. Notion-synced.
