@@ -159,34 +159,25 @@ Chosen for JSONB support and reliability. Evaluated against MySQL and SQLite.
 Add these to your agent's instructions for session-aware, proactive memory:
 
 ```markdown
-## Memoria -- Agent Memory Protocol
+## Memoria
 
-### Environment
-Set MEMORIA_VAULT to your vault path so all commands work:
-    export MEMORIA_VAULT=~/memory
-
-### Session lifecycle
-- Run `memoria wake` at session start.
-- Run `memoria checkpoint --working-on "<task>" --focus "<detail>"` during heavy work.
+- Set `MEMORIA_VAULT=~/memory` (or pass `-v ~/memory` on every command).
+- Run `memoria wake` at session start to restore context.
+- Run `memoria checkpoint --working-on "<task>"` during long tasks.
 - Run `memoria sleep "<summary>" --next "<next steps>"` before ending.
-
-### What to capture (proactively, without being asked)
-- Human shares personal info (name, location, health, etc.) -> `fact`
-- A decision is made -> `decision`
-- Human says "I prefer/always/never..." -> `preference`
-- An insight or lesson emerges -> `lesson`
-- A promise, goal, or deadline is set -> `commitment`
-- A person is mentioned with context -> `relationship`
-- An ongoing project is discussed -> `project`
-
-If in doubt, store it:
-    memoria remember <type> "<title>" --content "<details>"
-
-Memories auto-sync to Notion when configured. No separate sync step needed.
-
-### Before making decisions
-Search for existing context first:
-    memoria search "<topic>"
+- Before complex decisions, run `memoria search "<query>"` first.
+- Store important information immediately -- do not wait to be asked:
+  - Facts the human shares (name, location, health, settings, credentials context)
+  - Decisions made and why
+  - Preferences expressed ("I prefer...", "I always...", "I never...")
+  - Lessons learned from mistakes or discoveries
+  - Commitments, goals, or deadlines
+  - People mentioned with context
+  - Projects being worked on
+  - Use: `memoria remember <type> "<title>" --content "<details>"`
+  - Types: `fact`, `decision`, `preference`, `lesson`, `commitment`, `relationship`, `project`
+- After storing, always sync: `memoria sync --push`
+- If in doubt whether something is worth storing, store it.
 ```
 
 ## License

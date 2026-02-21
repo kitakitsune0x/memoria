@@ -306,62 +306,29 @@ memoria sync --dry-run
 Add the following block to your `AGENTS.md`, `.cursorrules`, or system prompt. It tells an AI agent how to use Memoria, what to capture, and when to do it.
 
 ```markdown
-## Memoria -- Agent Memory Protocol
+## Memoria
 
-### Environment
-
-The vault path must be set so all commands can find it:
-
-    export MEMORIA_VAULT=~/memory
-
-If MEMORIA_VAULT is not set, pass `-v ~/memory` to every command.
-
-### Session lifecycle
-
-- Run `memoria wake` at the START of every session.
-- Run `memoria checkpoint --working-on "<task>" --focus "<detail>"` periodically during work.
-- Run `memoria sleep "<summary>" --next "<next steps>"` BEFORE ending the session.
-
-### What to capture
-
-Store memories proactively whenever the human shares or you discover:
-
-| Signal | Type | Example |
-|--------|------|---------|
-| Human states a personal fact | `fact` | "I live in Tokyo", "My dog's name is Max", "HRT dose is 100mg" |
-| A technical or project decision is made | `decision` | "Use PostgreSQL for the backend", "Deploy on Fly.io" |
-| Human expresses a preference | `preference` | "I prefer dark mode", "Always use TypeScript", "No emojis in code" |
-| A lesson or insight emerges | `lesson` | "TTL caching is simpler", "Never force-push to main" |
-| Human or agent makes a promise / sets a goal | `commitment` | "Ship v2 by March", "Review PR by Friday" |
-| A person is mentioned with context | `relationship` | "Alice is the tech lead", "Bob handles DevOps" |
-| An ongoing project is discussed | `project` | "Building a memory system", "Migrating to Kubernetes" |
-
-**Rule of thumb: if in doubt, store it.** It is better to have a memory you never
-look up than to forget something the human told you.
-
-### How to store
-
-    memoria remember <type> "<title>" --content "<details>"
-
-Examples:
-
-    memoria remember fact "Human lives in Tokyo" --content "Mentioned during onboarding conversation"
-    memoria remember preference "No emojis in code" --content "Explicitly requested, applies to all generated code"
-    memoria remember decision "Use Fly.io" --content "Chosen over Vercel for lower latency in Asia-Pacific"
-
-Memories auto-sync to Notion when configured. No separate sync step needed.
-
-### When to search
-
-Before making decisions or giving advice, check for existing memories:
-
-    memoria search "<relevant topic>"
-
-This avoids contradicting earlier decisions or forgetting stated preferences.
+- Set `MEMORIA_VAULT=~/memory` (or pass `-v ~/memory` on every command).
+- Run `memoria wake` at session start to restore context.
+- Run `memoria checkpoint --working-on "<task>"` during long tasks.
+- Run `memoria sleep "<summary>" --next "<next steps>"` before ending.
+- Before complex decisions, run `memoria search "<query>"` first.
+- Store important information immediately -- do not wait to be asked:
+  - Facts the human shares (name, location, health, settings, credentials context)
+  - Decisions made and why
+  - Preferences expressed ("I prefer...", "I always...", "I never...")
+  - Lessons learned from mistakes or discoveries
+  - Commitments, goals, or deadlines
+  - People mentioned with context
+  - Projects being worked on
+  - Use: `memoria remember <type> "<title>" --content "<details>"`
+  - Types: `fact`, `decision`, `preference`, `lesson`, `commitment`, `relationship`, `project`
+- After storing, always sync: `memoria sync --push`
+- If in doubt whether something is worth storing, store it.
 
 ### Proactive capture triggers
 
-Actively listen for these patterns in conversation and store them immediately:
+Listen for these patterns and store immediately:
 
 - "I always...", "I never...", "I prefer..." -> `preference`
 - "Let's go with...", "We decided...", "The plan is..." -> `decision`
@@ -370,8 +337,6 @@ Actively listen for these patterns in conversation and store them immediately:
 - "I need to...", "I promised...", "By next week..." -> `commitment`
 - "Talk to Alice about...", "Bob said..." -> `relationship`
 - "We're building...", "The project is..." -> `project`
-
-Do not wait to be asked. If the human shares something worth remembering, store it.
 ```
 
 ---
