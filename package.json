@@ -1,5 +1,5 @@
 {
-  "name": "memoria",
+  "name": "@kitakitsune/memoria",
   "version": "0.1.0",
   "description": "Structured memory system for AI agents with local markdown vault and Notion sync",
   "type": "module",
@@ -35,6 +35,10 @@
     "agent-memory"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "engines": {
     "node": ">=18"
   },
