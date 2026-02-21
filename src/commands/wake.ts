@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import { resolveVault, listDocuments } from '../lib/vault.js';
 import { getSession, startSession, getRecentHandoffs } from '../lib/session.js';
+import { createNotionClient } from '../lib/notion-client.js';
+import { pullFromNotion } from '../lib/notion-sync.js';
 
 export async function wakeCommand(
   options: { vault?: string },
@@ -15,6 +17,18 @@ export async function wakeCommand(
       console.log(chalk.dim(`Working on: ${session.workingOn}`));
     }
     return;
+  }
+
+  if (config.notion) {
+    try {
+      const client = createNotionClient(config.notion.token);
+      const report = await pullFromNotion(client, config);
+      if (report.pulled.length > 0) {
+        console.log(chalk.dim(`Pulled ${report.pulled.length} update(s) from Notion.`));
+      }
+    } catch (err) {
+      console.log(chalk.yellow(`Notion pull skipped: ${err instanceof Error ? err.message : String(err)}`));
+    }
   }
 
   await startSession(config.path);

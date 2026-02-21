@@ -131,9 +131,9 @@ export async function pullFromNotion(
 
   for (const [category, dbId] of Object.entries(state.databases)) {
     try {
-      const response = await queryDatabase(client, dbId, state.lastSyncAt || undefined);
+      const pages = await queryDatabase(client, dbId, state.lastSyncAt || undefined);
 
-      for (const page of response.results) {
+      for (const page of pages) {
         const pageAny = page as Record<string, unknown>;
         const pageId = pageAny.id as string;
         const lastEdited = pageAny.last_edited_time as string;

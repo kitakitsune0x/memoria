@@ -130,7 +130,7 @@ export async function queryDatabase(
   client: Client,
   databaseId: string,
   lastSyncAt?: string,
-): Promise<QueryDatabaseResponse> {
+): Promise<QueryDatabaseResponse['results']> {
   const filter = lastSyncAt
     ? {
         timestamp: 'last_edited_time' as const,
@@ -138,10 +138,20 @@ export async function queryDatabase(
       }
     : undefined;
 
-  return client.databases.query({
-    database_id: databaseId,
-    filter,
-  });
+  const allResults: QueryDatabaseResponse['results'] = [];
+  let cursor: string | undefined;
+
+  do {
+    const response = await client.databases.query({
+      database_id: databaseId,
+      filter,
+      start_cursor: cursor,
+    });
+    allResults.push(...response.results);
+    cursor = response.has_more ? response.next_cursor ?? undefined : undefined;
+  } while (cursor);
+
+  return allResults;
 }
 
 export async function getPageBlocks(
