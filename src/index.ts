@@ -8,3 +8,4 @@ export { createNotionClient } from './lib/notion-client.js';
 export { markdownToBlocks, blocksToMarkdown } from './lib/notion-converter.js';
 export { readSyncState, writeSyncState } from './lib/sync-state.js';
 export { pushToNotion, pullFromNotion } from './lib/notion-sync.js';
+export { autoSyncIfEnabled } from './lib/auto-sync.js';

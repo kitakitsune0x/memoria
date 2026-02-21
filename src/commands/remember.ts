@@ -1,12 +1,20 @@
 import chalk from 'chalk';
 import { resolveVault, storeDocument } from '../lib/vault.js';
+import { autoSyncIfEnabled } from '../lib/auto-sync.js';
 import { MEMORY_TYPES, TYPE_TO_CATEGORY } from '../types.js';
 import type { MemoryType } from '../types.js';
 
 export async function rememberCommand(
   type: string,
   title: string,
-  options: { content?: string; tags?: string; vault?: string; overwrite?: boolean },
+  options: {
+    content?: string;
+    tags?: string;
+    vault?: string;
+    overwrite?: boolean;
+    sync?: boolean;
+    noSync?: boolean;
+  },
 ): Promise<void> {
   if (!MEMORY_TYPES.includes(type as MemoryType)) {
     console.log(chalk.red(`Invalid memory type: "${type}"`));
@@ -29,4 +37,7 @@ export async function rememberCommand(
 
   console.log(chalk.green(`Remembered ${memType}: ${doc.title}`));
   console.log(chalk.dim(`Stored in: ${doc.path}`));
+
+  const syncFlag = options.noSync ? false : options.sync;
+  await autoSyncIfEnabled(config, syncFlag);
 }

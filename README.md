@@ -11,7 +11,7 @@ Structured memory system for AI agents with local markdown vault and two-way Not
 ## Install
 
 ```bash
-npm install -g memoria
+npm install -g @kitakitsune/memoria
 ```
 
 Or run locally:
@@ -156,15 +156,37 @@ Chosen for JSONB support and reliability. Evaluated against MySQL and SQLite.
 
 ## AGENTS.md Integration
 
-Add these to your agent's instructions for session-aware memory:
+Add these to your agent's instructions for session-aware, proactive memory:
 
 ```markdown
-## Memoria
+## Memoria -- Agent Memory Protocol
+
+### Environment
+Set MEMORIA_VAULT to your vault path so all commands work:
+    export MEMORIA_VAULT=~/memory
+
+### Session lifecycle
 - Run `memoria wake` at session start.
-- Run `memoria checkpoint --working-on "<task>"` during heavy work.
+- Run `memoria checkpoint --working-on "<task>" --focus "<detail>"` during heavy work.
 - Run `memoria sleep "<summary>" --next "<next steps>"` before ending.
-- Use `memoria search "<query>"` before complex decisions.
-- Use `memoria remember <type> "<title>" --content "<details>"` for important observations.
+
+### What to capture (proactively, without being asked)
+- Human shares personal info (name, location, health, etc.) -> `fact`
+- A decision is made -> `decision`
+- Human says "I prefer/always/never..." -> `preference`
+- An insight or lesson emerges -> `lesson`
+- A promise, goal, or deadline is set -> `commitment`
+- A person is mentioned with context -> `relationship`
+- An ongoing project is discussed -> `project`
+
+If in doubt, store it:
+    memoria remember <type> "<title>" --content "<details>"
+
+Memories auto-sync to Notion when configured. No separate sync step needed.
+
+### Before making decisions
+Search for existing context first:
+    memoria search "<topic>"
 ```
 
 ## License

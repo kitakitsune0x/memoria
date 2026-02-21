@@ -27,9 +27,11 @@ export async function setupNotionCommand(
     token: options.token,
     rootPageId: options.page,
   };
+  config.autoSync = true;
 
   await writeConfig(config);
   console.log(chalk.green('Notion integration configured.'));
   console.log(chalk.dim(`Root page: ${options.page}`));
-  console.log(chalk.dim('Run "memoria sync --push" to push your vault to Notion.'));
+  console.log(chalk.dim('Auto-sync enabled. Memories will push to Notion automatically.'));
+  console.log(chalk.dim('Disable with: memoria config --no-auto-sync'));
 }

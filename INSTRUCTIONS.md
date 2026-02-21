@@ -239,13 +239,29 @@ Sync your local vault to Notion for a rich browsing and editing UI. Local files 
 memoria setup-notion --token ntn_your_token_here --page abc123def456789...
 ```
 
-### Step 4: Sync
+This enables **auto-sync**: every `memoria remember` and `memoria store` call will automatically push to Notion after saving locally. No separate sync step needed.
+
+### Auto-sync behavior
+
+Once Notion is configured, `remember` and `store` save locally **and** push to Notion in one step. You can control this per-call:
 
 ```bash
-# Push all local documents to Notion
+# Force sync even if auto-sync is off
+memoria remember fact "something" --content "..." --sync
+
+# Skip sync for this one call
+memoria remember fact "draft" --content "..." --no-sync
+```
+
+### Manual sync
+
+For bulk operations or pulling Notion edits back to local:
+
+```bash
+# Push all local changes to Notion
 memoria sync --push
 
-# Pull changes from Notion back to local
+# Pull Notion changes to local
 memoria sync --pull
 
 # Two-way sync (push then pull)
@@ -259,6 +275,7 @@ memoria sync --dry-run
 
 | Scenario | Default behavior |
 |----------|-----------------|
+| `remember` / `store` with Notion configured | Auto-pushes to Notion |
 | New local file | Created as a Notion page |
 | Updated local file | Notion page updated |
 | New Notion page | Pulled to local as markdown |
@@ -286,15 +303,75 @@ memoria sync --dry-run
 
 ## 8. Agent Integration
 
-Add these instructions to your `AGENTS.md`, `.cursorrules`, or system prompt to give an AI agent session-aware memory:
+Add the following block to your `AGENTS.md`, `.cursorrules`, or system prompt. It tells an AI agent how to use Memoria, what to capture, and when to do it.
 
 ```markdown
-## Memoria
-- Run `memoria wake` at session start.
-- Run `memoria checkpoint --working-on "<task>"` during heavy work.
-- Run `memoria sleep "<summary>" --next "<next steps>"` before ending.
-- Use `memoria search "<query>"` before complex decisions.
-- Use `memoria remember <type> "<title>" --content "<details>"` for important observations.
+## Memoria -- Agent Memory Protocol
+
+### Environment
+
+The vault path must be set so all commands can find it:
+
+    export MEMORIA_VAULT=~/memory
+
+If MEMORIA_VAULT is not set, pass `-v ~/memory` to every command.
+
+### Session lifecycle
+
+- Run `memoria wake` at the START of every session.
+- Run `memoria checkpoint --working-on "<task>" --focus "<detail>"` periodically during work.
+- Run `memoria sleep "<summary>" --next "<next steps>"` BEFORE ending the session.
+
+### What to capture
+
+Store memories proactively whenever the human shares or you discover:
+
+| Signal | Type | Example |
+|--------|------|---------|
+| Human states a personal fact | `fact` | "I live in Tokyo", "My dog's name is Max", "HRT dose is 100mg" |
+| A technical or project decision is made | `decision` | "Use PostgreSQL for the backend", "Deploy on Fly.io" |
+| Human expresses a preference | `preference` | "I prefer dark mode", "Always use TypeScript", "No emojis in code" |
+| A lesson or insight emerges | `lesson` | "TTL caching is simpler", "Never force-push to main" |
+| Human or agent makes a promise / sets a goal | `commitment` | "Ship v2 by March", "Review PR by Friday" |
+| A person is mentioned with context | `relationship` | "Alice is the tech lead", "Bob handles DevOps" |
+| An ongoing project is discussed | `project` | "Building a memory system", "Migrating to Kubernetes" |
+
+**Rule of thumb: if in doubt, store it.** It is better to have a memory you never
+look up than to forget something the human told you.
+
+### How to store
+
+    memoria remember <type> "<title>" --content "<details>"
+
+Examples:
+
+    memoria remember fact "Human lives in Tokyo" --content "Mentioned during onboarding conversation"
+    memoria remember preference "No emojis in code" --content "Explicitly requested, applies to all generated code"
+    memoria remember decision "Use Fly.io" --content "Chosen over Vercel for lower latency in Asia-Pacific"
+
+Memories auto-sync to Notion when configured. No separate sync step needed.
+
+### When to search
+
+Before making decisions or giving advice, check for existing memories:
+
+    memoria search "<relevant topic>"
+
+This avoids contradicting earlier decisions or forgetting stated preferences.
+
+### Proactive capture triggers
+
+Actively listen for these patterns in conversation and store them immediately:
+
+- "I always...", "I never...", "I prefer..." -> `preference`
+- "Let's go with...", "We decided...", "The plan is..." -> `decision`
+- "I learned that...", "Turns out...", "The trick is..." -> `lesson`
+- "My name is...", "I take...", "I live in...", "I work at..." -> `fact`
+- "I need to...", "I promised...", "By next week..." -> `commitment`
+- "Talk to Alice about...", "Bob said..." -> `relationship`
+- "We're building...", "The project is..." -> `project`
+
+Do not wait to be asked. If the human shares something worth remembering, store it.
 ```
 
 ---
@@ -323,22 +400,24 @@ The filename is a slug of the title (e.g. `use-postgresql.md`) stored in the cat
 ## 10. CLI Quick Reference
 
 ```
-memoria init <path> [--name <name>]         Initialize a vault
-memoria remember <type> <title> [options]    Store typed memory
-memoria store <category> <title> [options]   Store in category
-memoria search <query> [options]             Search documents
-memoria list [category] [--tags <t>]         List documents
-memoria get <id>                             Get a document
-memoria wake                                 Start session
-memoria sleep <summary> [--next <steps>]     End session
-memoria checkpoint [--working-on <t>]        Mid-session save
-memoria status                               Vault info
-memoria setup-notion --token <t> --page <id> Configure Notion
-memoria sync [--push] [--pull] [--dry-run]   Sync with Notion
-memoria --version                            Show version
-memoria --help                               Show help
+memoria init <path> [--name <name>]              Initialize a vault
+memoria remember <type> <title> [options]         Store typed memory (auto-syncs)
+memoria store <category> <title> [options]        Store in category (auto-syncs)
+memoria search <query> [options]                  Search documents
+memoria list [category] [--tags <t>]              List documents
+memoria get <id>                                  Get a document
+memoria wake                                      Start session
+memoria sleep <summary> [--next <steps>]          End session
+memoria checkpoint [--working-on <t>]             Mid-session save
+memoria status                                    Vault info
+memoria setup-notion --token <t> --page <id>      Configure Notion + enable auto-sync
+memoria sync [--push] [--pull] [--dry-run]        Manual sync with Notion
+memoria --version                                 Show version
+memoria --help                                    Show help
 ```
 
 Global options available on most commands:
 
 - `-v, --vault <path>` -- specify vault path (overrides `MEMORIA_VAULT`)
+- `--sync` -- force push to Notion after this operation
+- `--no-sync` -- skip auto-sync for this operation

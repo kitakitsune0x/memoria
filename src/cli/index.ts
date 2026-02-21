@@ -33,6 +33,8 @@ export function createProgram(): Command {
     .option('-t, --tags <tags>', 'Comma-separated tags')
     .option('-v, --vault <path>', 'Vault path')
     .option('--overwrite', 'Overwrite existing document')
+    .option('--sync', 'Push to Notion after storing')
+    .option('--no-sync', 'Skip auto-sync even if enabled')
     .action(storeCommand);
 
   program
@@ -42,6 +44,8 @@ export function createProgram(): Command {
     .option('-t, --tags <tags>', 'Comma-separated tags')
     .option('-v, --vault <path>', 'Vault path')
     .option('--overwrite', 'Overwrite existing document')
+    .option('--sync', 'Push to Notion after storing')
+    .option('--no-sync', 'Skip auto-sync even if enabled')
     .action(rememberCommand);
 
   program

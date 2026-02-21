@@ -2,6 +2,7 @@ export interface VaultConfig {
   path: string;
   name: string;
   categories: string[];
+  autoSync?: boolean;
   notion?: NotionConfig;
 }
 
